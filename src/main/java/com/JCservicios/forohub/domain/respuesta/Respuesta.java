@@ -19,8 +19,22 @@ public class Respuesta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String mensaje;
-    private Topico ropico;
+
+    @ManyToOne
+    @JoinColumn(name = "topico_id")
+    private Topico topico;
     private LocalDateTime fechaCreacion;
+    @ManyToOne
+    @JoinColumn(name = "autor_id")
     private Usuario autor;
+
     private String solucion;
+
+    public void setRopico(Topico topico) {
+        this.topico = topico;
+    }
+
+    public void setAutor(Usuario autor) {
+        this.autor = autor;
+    }
 }

@@ -30,9 +30,22 @@ public class Topico {
     private LocalDateTime fechaCreacion;
     @Enumerated(EnumType.STRING)
     private StatusTopico status;
+
+    @ManyToOne
+    @JoinColumn(name = "curso_id")
     private Curso curso;
+
+    @ManyToOne
+    @JoinColumn(name = "respuesta_id")
     private Respuesta respuesta;
 
+    public void setRespuesta(Respuesta respuesta) {
+        this.respuesta = respuesta;
+    }
+
+    public void setCurso(Curso curso) {
+        this.curso = curso;
+    }
 
 
     public Usuario getAutor() {
