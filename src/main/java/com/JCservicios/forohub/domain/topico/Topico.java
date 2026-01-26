@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name = "Topico")
 @Table(name = "topicos")
@@ -35,12 +36,12 @@ public class Topico {
     @JoinColumn(name = "curso_id")
     private Curso curso;
 
-    @ManyToOne
-    @JoinColumn(name = "respuesta_id")
-    private Respuesta respuesta;
+    @OneToMany(mappedBy = "topico")
+    private List<Respuesta> respuesta;
 
     public void setRespuesta(Respuesta respuesta) {
-        this.respuesta = respuesta;
+        respuesta.setRopico(this);
+        this.respuesta.add(respuesta);
     }
 
     public void setCurso(Curso curso) {
