@@ -1,4 +1,11 @@
 package com.JCservicios.forohub.domain.curso;
 
-public record DatosRespuestaCurso() {
+import lombok.extern.java.Log;
+
+public record DatosRespuestaCurso(
+        Long id,
+        String nombre,
+        String categoria
+
+) {
 }

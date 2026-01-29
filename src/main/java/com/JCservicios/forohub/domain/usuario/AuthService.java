@@ -30,7 +30,7 @@ public class AuthService {
         Usuario nuevoUsuario = new Usuario(
                 registroUsuarioDTO.nombre(),
                 registroUsuarioDTO.email(),
-                perfilRepository.findByRol(Rol.ROLE_USER).orElseThrow(() -> new IllegalStateException("Rol de usuario no encontrado")),
+                perfilRepository.findByRol(Rol.ROLE_USER),
                 encodedPassword
         );
         usuarioRepository.save(nuevoUsuario);

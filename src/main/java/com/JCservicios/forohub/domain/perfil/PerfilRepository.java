@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface PerfilRepository  extends JpaRepository<Perfil,Long> {
 
-    Optional<Perfil> findByRol(Rol rol);
+    Perfil findByRol(Rol rol);
 }

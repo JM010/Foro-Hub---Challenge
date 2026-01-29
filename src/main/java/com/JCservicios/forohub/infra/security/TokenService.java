@@ -24,10 +24,7 @@ public class TokenService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return  JWT.create()
                     .withIssuer("ForoHub")
-                    .withSubject(usuario.getNombre())
-                    .withClaim("id", usuario.getId())
-                    .withClaim("nombre", usuario.getNombre())
-                    .withClaim("email", usuario.getEmail())
+                    .withSubject(usuario.getEmail())
                     .withExpiresAt(fechaExpiracion())
                     .sign(algorithm);
         } catch(JWTCreationException exception){
