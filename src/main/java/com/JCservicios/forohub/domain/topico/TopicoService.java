@@ -3,6 +3,7 @@ package com.JCservicios.forohub.domain.topico;
 import com.JCservicios.forohub.domain.curso.CursoRepository;
 import com.JCservicios.forohub.domain.exception.ValidationException;
 import com.JCservicios.forohub.domain.usuario.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +51,7 @@ public class TopicoService {
     @Transactional
     public DatosDetalleTopico obtenerTopico(Long id) {
         if (!topicoRepository.existsById(id)) {
-            throw new ValidationException("El ID del tópico no existe");
+            throw new EntityNotFoundException("El ID del tópico no existe");
         }
         var topico = topicoRepository.getReferenceById(id);
         return new DatosDetalleTopico(topico);
@@ -58,7 +59,7 @@ public class TopicoService {
 
     @Transactional
     public DatosDetalleTopico actualizarTopico(@Valid DatosRegistroTopico datos, Long id) {
-        var topico = topicoRepository.findById(id).orElseThrow(() -> new ValidationException("El ID del tópico no existe"));
+        var topico = topicoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("El ID del tópico no existe"));
 
         if (topicoRepository.existsByTituloAndCursoId(datos.titulo(), datos.idCurso())) {
             throw new ValidationException("Ya existe un tópico con el mismo título en este curso");
@@ -71,8 +72,10 @@ public class TopicoService {
     @Transactional
     public void eliminarTopico(Long id) {
         if (!topicoRepository.existsById(id)) {
-            throw new ValidationException("El ID del tópico no existe");
+            throw new EntityNotFoundException("El ID del tópico no existe");
         }
         topicoRepository.deleteById(id);
     }
+
+
 }
