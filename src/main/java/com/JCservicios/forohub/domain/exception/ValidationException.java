@@ -1,7 +1,7 @@
-package com.JCservicios.forohub.domain.execption;
+package com.JCservicios.forohub.domain.exception;
 
-public class ValidationExecption extends RuntimeException {
-    public ValidationExecption(String message) {
+public class ValidationException extends RuntimeException {
+    public ValidationException(String message) {
         super(message);
     }
 }
