@@ -1,6 +1,11 @@
 package com.JCservicios.forohub.domain.curso;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CursoService {
@@ -18,6 +23,10 @@ public class CursoService {
         Curso curso = new Curso(datos);
         cursoRepository.save(curso);
         return new DatosRespuestaCurso(curso.getId(), curso.getNombre(), curso.getCategoria());
+    }
+
+    public Page<DatosRespuestaCurso> listar(Pageable pageable) {
+        return cursoRepository.findAll(pageable).map(DatosRespuestaCurso::new);
     }
 
 

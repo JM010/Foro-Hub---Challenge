@@ -8,4 +8,7 @@ public record DatosRespuestaCurso(
         String categoria
 
 ) {
+    DatosRespuestaCurso(Curso curso) {
+        this(curso.getId(), curso.getNombre(), curso.getCategoria());
+    }
 }

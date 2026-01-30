@@ -44,7 +44,7 @@ public class AuthenticationController {
         var authenticated = manager.authenticate(authenticationToken);
         var tokenJWT = tokenService.generarToken((Usuario) authenticated.getPrincipal());
 
-        return ResponseEntity.ok( new DatosJWT(tokenJWT));
+        return ResponseEntity.ok(new DatosJWT(tokenJWT));
 
     }
 }
