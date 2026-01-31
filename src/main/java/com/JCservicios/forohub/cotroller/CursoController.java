@@ -4,6 +4,7 @@ package com.JCservicios.forohub.cotroller;
 import com.JCservicios.forohub.domain.curso.CursoService;
 import com.JCservicios.forohub.domain.curso.DatosRegistroCurso;
 import com.JCservicios.forohub.domain.curso.DatosRespuestaCurso;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/curso")
+@SecurityRequirement(name = "bearer-key")
 public class CursoController {
 
 
@@ -37,6 +39,12 @@ public class CursoController {
     public ResponseEntity<Page<DatosRespuestaCurso>> listarCursos(@PageableDefault(size = 10, sort = {"categoria","nombre"})Pageable paginacion) {
         Page<DatosRespuestaCurso> cursos = cursoService.listar(paginacion);
         return ResponseEntity.ok(cursos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DatosRespuestaCurso> obtenerCurso(@PathVariable Long id) {
+        DatosRespuestaCurso curso = cursoService.obtenerCursoPorId(id);
+        return ResponseEntity.ok(curso);
     }
 
 }
