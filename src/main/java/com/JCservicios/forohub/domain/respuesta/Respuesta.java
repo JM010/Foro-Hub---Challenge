@@ -1,5 +1,6 @@
 package com.JCservicios.forohub.domain.respuesta;
 
+import com.JCservicios.forohub.domain.topico.StatusTopico;
 import com.JCservicios.forohub.domain.topico.Topico;
 import com.JCservicios.forohub.domain.usuario.Usuario;
 import jakarta.persistence.*;
@@ -28,13 +29,31 @@ public class Respuesta {
     @JoinColumn(name = "autor_id")
     private Usuario autor;
 
-    private String solucion;
+    private boolean solucion;
 
     public void setRopico(Topico topico) {
         this.topico = topico;
     }
 
+    public Respuesta(String mensaje,Usuario autor, Topico topico) {
+        this.mensaje = mensaje;
+        this.autor = autor;
+        this.topico = topico;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.fechaCreacion = LocalDateTime.now();
+        this.solucion= false;
+    }
+
     public void setAutor(Usuario autor) {
         this.autor = autor;
+    }
+
+    public void actualizarMensaje(String mensaje) {
+        if (!mensaje.isBlank()) {
+            this.mensaje = mensaje;
+        }
     }
 }
