@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -25,6 +26,7 @@ public class CursoController {
         this.cursoService = cursoService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<DatosRespuestaCurso> registrarCurso(@RequestBody @Valid DatosRegistroCurso datos, UriComponentsBuilder uriComponentsBuilder) {
 
@@ -33,6 +35,13 @@ public class CursoController {
         var uri = uriComponentsBuilder.path("/curso/{id}").buildAndExpand(cursoCreado.id()).toUri();
 
         return ResponseEntity.created(uri).body(cursoCreado);
+    }
+
+    @PutMapping( "/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DatosRespuestaCurso> actualizarCurso(@RequestBody @Valid DatosRegistroCurso datos, @PathVariable Long id) {
+        DatosRespuestaCurso cursoActualizado = cursoService.actualizarCurso(datos, id);
+        return ResponseEntity.ok(cursoActualizado);
     }
 
     @GetMapping
@@ -45,6 +54,13 @@ public class CursoController {
     public ResponseEntity<DatosRespuestaCurso> obtenerCurso(@PathVariable Long id) {
         DatosRespuestaCurso curso = cursoService.obtenerCursoPorId(id);
         return ResponseEntity.ok(curso);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
+        cursoService.eliminarCurso(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

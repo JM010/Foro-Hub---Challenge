@@ -2,6 +2,7 @@ package com.JCservicios.forohub.domain.curso;
 
 import com.JCservicios.forohub.domain.topico.Topico;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,5 +27,14 @@ public class Curso {
     public Curso(DatosRegistroCurso datos) {
         this.nombre = datos.nombre();
         this.categoria = datos.categoria();
+    }
+
+    public void actualizarDatos(@Valid DatosRegistroCurso datos) {
+        if ( !datos.nombre().isBlank()) {
+            this.nombre = datos.nombre();
+        }
+        if (!datos.categoria().isBlank()) {
+            this.categoria = datos.categoria();
+        }
     }
 }
