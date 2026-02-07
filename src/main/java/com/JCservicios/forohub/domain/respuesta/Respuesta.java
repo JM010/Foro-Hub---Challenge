@@ -56,4 +56,8 @@ public class Respuesta {
             this.mensaje = mensaje;
         }
     }
+
+    public void setSolucion(boolean solucion) {
+        this.solucion = solucion;
+    }
 }

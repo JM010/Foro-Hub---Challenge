@@ -8,6 +8,8 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
 
     boolean existsByIdAndTopicoId(Long idRespuesta, Long idTopico);
 
+    boolean existsByIdAndAutorId(Long idRespuesta, Long idUsuario);
+
     Page<Respuesta> findByTopicoId(Long idTopico, Pageable pageable);
 
 

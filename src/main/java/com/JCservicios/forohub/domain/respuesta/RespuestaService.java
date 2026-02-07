@@ -3,6 +3,7 @@ package com.JCservicios.forohub.domain.respuesta;
 
 import com.JCservicios.forohub.domain.exception.ValidationException;
 import com.JCservicios.forohub.domain.perfil.Rol;
+import com.JCservicios.forohub.domain.topico.StatusTopico;
 import com.JCservicios.forohub.domain.topico.Topico;
 import com.JCservicios.forohub.domain.topico.TopicoRepository;
 import com.JCservicios.forohub.domain.usuario.Usuario;
@@ -27,10 +28,12 @@ public class RespuestaService {
 
 
 
+
     public DatosRepuesta agregarRespuesta(Long id, @Valid DatosRegistroRespuesta datos, Usuario usuario) {
         Topico topico = topicoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tópico no encontrado"));
 
         Respuesta respuesta =  new Respuesta(datos.mensaje(),usuario,topico);
+        topico.setStatus(StatusTopico.RESPONDIDO);
         respuestaRepository.save(respuesta);
         return new DatosRepuesta(respuesta);
     }
@@ -62,4 +65,9 @@ public class RespuestaService {
         }
         return respuestaRepository.findByTopicoId(idTopico,pageable).map(DatosRepuesta::new);
     }
+
+    public void eliminarRespuesta(Long idRespuesta) {
+        respuestaRepository.deleteById(idRespuesta);
+    }
+
 }
