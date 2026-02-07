@@ -1,9 +1,6 @@
 package com.JCservicios.forohub.cotroller;
 
-import com.JCservicios.forohub.domain.respuesta.DatosActualizarRespuesta;
-import com.JCservicios.forohub.domain.respuesta.DatosRegistroRespuesta;
-import com.JCservicios.forohub.domain.respuesta.DatosRepuesta;
-import com.JCservicios.forohub.domain.respuesta.RespuestaService;
+import com.JCservicios.forohub.domain.respuesta.*;
 import com.JCservicios.forohub.domain.topico.*;
 import com.JCservicios.forohub.domain.usuario.Usuario;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,9 +29,13 @@ public class TopicoController {
 
 
     @PostMapping
-    public ResponseEntity<DatosRespuestaTopico> crearTopico(@RequestBody @Valid DatosRegistroTopico datos, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<DatosRespuestaTopico> crearTopico(@RequestBody @Valid DatosRegistroTopico datos,
+                                                            UriComponentsBuilder uriComponentsBuilder,
+                                                            @AuthenticationPrincipal Usuario usuario
+                                                            )
+    {
 
-        DatosRespuestaTopico respuesta = topicoService.crearTopico(datos);
+        DatosRespuestaTopico respuesta = topicoService.crearTopico(datos, usuario.getId());
 
         var uri = uriComponentsBuilder.path("/Topicos/{id}").buildAndExpand(respuesta.id()).toUri();
 
@@ -64,10 +66,18 @@ public class TopicoController {
         return ResponseEntity.ok(topicoActualizado);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @topicoSecurity.isAutor(#id, authentication.principal.id)")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarTopico(@PathVariable Long id) {
-        topicoService.eliminarTopico(id);
+    public ResponseEntity<Void> eliminarTopico(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        topicoService.eliminarTopico(id, usuario) ;
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/respuestas/{idRespuesta}/solucion")
+    @PreAuthorize("hasRole('ADMIN') or @topicoSecurity.isAutor(#id, authentication.principal.id)")
+    public ResponseEntity<DatosSolucion> solucionTopico( @PathVariable Long id, @PathVariable Long idRespuesta) {
+          DatosSolucion solucion = topicoService.marcarComoSolucion(id, idRespuesta);
+        return ResponseEntity.ok(solucion);
     }
 
     /** Request de respuestas **/
@@ -97,6 +107,13 @@ public class TopicoController {
     public ResponseEntity<Page<DatosRepuesta>> listarRespuestas(@PageableDefault(size = 10, sort = "fechaCreacion") Pageable pageable, @PathVariable Long idTopico){
         Page <DatosRepuesta> repuestas = respuestaService.listar(pageable, idTopico);
         return ResponseEntity.ok(repuestas);
+    }
+
+    @PreAuthorize( "hasRole('ADMIN') or @respuestaSecurity.isAutor(#idRespuesta, authentication.principal.id)")
+    @DeleteMapping("/{idTopico}/respuestas/{idRespuesta}")
+    public ResponseEntity<Void> eliminarRespuesta(@PathVariable Long idTopico, @PathVariable Long idRespuesta) {
+        respuestaService.eliminarRespuesta(idRespuesta);
+        return ResponseEntity.noContent().build();
     }
 
 

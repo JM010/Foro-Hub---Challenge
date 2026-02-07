@@ -37,7 +37,8 @@ public class Topico {
     @JoinColumn(name = "curso_id")
     private Curso curso;
 
-    @OneToMany(mappedBy = "topico")
+    @OneToMany(mappedBy = "topico", cascade = CascadeType.REMOVE, orphanRemoval = true
+    )
     private List<Respuesta> respuesta;
 
     public Topico(DatosRegistroTopico datos) {
@@ -59,6 +60,10 @@ public class Topico {
 
     public void setCurso(Curso curso) {
         this.curso = curso;
+    }
+
+    public void setStatus(StatusTopico status) {
+        this.status = status;
     }
 
 

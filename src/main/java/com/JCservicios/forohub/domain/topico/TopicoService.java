@@ -2,9 +2,12 @@ package com.JCservicios.forohub.domain.topico;
 
 import com.JCservicios.forohub.domain.curso.CursoRepository;
 import com.JCservicios.forohub.domain.exception.ValidationException;
+import com.JCservicios.forohub.domain.respuesta.DatosSolucion;
+import com.JCservicios.forohub.domain.usuario.Usuario;
 import com.JCservicios.forohub.domain.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,14 +27,15 @@ public class TopicoService {
         this.cursoRepository = cursoRepository;
     }
 
-    public DatosRespuestaTopico crearTopico(DatosRegistroTopico datos) {
+    public DatosRespuestaTopico crearTopico(DatosRegistroTopico datos, Long usuarioId) {
         if (topicoRepository.existsByTituloAndCursoId(datos.titulo(), datos.idCurso())) {
             throw new ValidationException("Ya existe un tópico con el mismo título en este curso");
         }
-        if (!usuarioRepository.existsById(datos.idAutor())){
+        if (!usuarioRepository.existsById(usuarioId)){
             throw new ValidationException("El ID del autor no existe");
         }
-        var usuario = usuarioRepository.findById(datos.idAutor()).get();
+
+        var usuario = usuarioRepository.findById(usuarioId).get();
         var curso = cursoRepository.findById(datos.idCurso()).orElseThrow(() -> new ValidationException("El ID del curso no existe"));
 
         var topico = new Topico(datos);
@@ -69,11 +73,28 @@ public class TopicoService {
     }
 
     @Transactional
-    public void eliminarTopico(Long id) {
-        if (!topicoRepository.existsById(id)) {
-            throw new EntityNotFoundException("El ID del tópico no existe");
-        }
+    public void eliminarTopico(Long id, Usuario usuario) {
+
         topicoRepository.deleteById(id);
+    }
+
+    @Transactional
+    public DatosSolucion marcarComoSolucion(Long idTopico, Long idRespuesta) {
+        var topico = topicoRepository.findById(idTopico).orElseThrow(() -> new EntityNotFoundException("El ID del tópico no existe"));
+
+        topico.getRespuesta()
+                .forEach(r -> r.setSolucion(false));
+
+        var respuesta = topico.getRespuesta().stream()
+                .filter(r -> r.getId().equals(idRespuesta))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("El ID de la respuesta no existe en este tópico"));
+
+        topico.setStatus(StatusTopico.CERRADO);
+        respuesta.setSolucion(true);
+
+        return new DatosSolucion(respuesta);
+
     }
 
 
