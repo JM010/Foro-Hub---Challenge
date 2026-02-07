@@ -1,0 +1,66 @@
+package com.JCservicios.forohub.cotroller;
+
+
+import com.JCservicios.forohub.domain.curso.CursoService;
+import com.JCservicios.forohub.domain.curso.DatosRegistroCurso;
+import com.JCservicios.forohub.domain.curso.DatosRespuestaCurso;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+@RestController
+@RequestMapping("/curso")
+@SecurityRequirement(name = "bearer-key")
+public class CursoController {
+
+
+    private final CursoService cursoService;
+
+    public CursoController(CursoService cursoService) {
+        this.cursoService = cursoService;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public ResponseEntity<DatosRespuestaCurso> registrarCurso(@RequestBody @Valid DatosRegistroCurso datos, UriComponentsBuilder uriComponentsBuilder) {
+
+        DatosRespuestaCurso cursoCreado = cursoService.crearCurso(datos);
+
+        var uri = uriComponentsBuilder.path("/curso/{id}").buildAndExpand(cursoCreado.id()).toUri();
+
+        return ResponseEntity.created(uri).body(cursoCreado);
+    }
+
+    @PutMapping( "/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DatosRespuestaCurso> actualizarCurso(@RequestBody @Valid DatosRegistroCurso datos, @PathVariable Long id) {
+        DatosRespuestaCurso cursoActualizado = cursoService.actualizarCurso(datos, id);
+        return ResponseEntity.ok(cursoActualizado);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<DatosRespuestaCurso>> listarCursos(@PageableDefault(size = 10, sort = {"categoria","nombre"})Pageable paginacion) {
+        Page<DatosRespuestaCurso> cursos = cursoService.listar(paginacion);
+        return ResponseEntity.ok(cursos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DatosRespuestaCurso> obtenerCurso(@PathVariable Long id) {
+        DatosRespuestaCurso curso = cursoService.obtenerCursoPorId(id);
+        return ResponseEntity.ok(curso);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
+        cursoService.eliminarCurso(id);
+        return ResponseEntity.noContent().build();
+    }
+
+}

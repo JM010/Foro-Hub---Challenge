@@ -1,0 +1,101 @@
+package com.JCservicios.forohub.domain.topico;
+
+import com.JCservicios.forohub.domain.curso.CursoRepository;
+import com.JCservicios.forohub.domain.exception.ValidationException;
+import com.JCservicios.forohub.domain.respuesta.DatosSolucion;
+import com.JCservicios.forohub.domain.usuario.Usuario;
+import com.JCservicios.forohub.domain.usuario.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+public class TopicoService {
+    private final TopicoRepository topicoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final  CursoRepository cursoRepository;
+
+
+    public TopicoService(TopicoRepository topicoRepository, UsuarioRepository usuarioRepository, CursoRepository cursoRepository) {
+        this.topicoRepository = topicoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.cursoRepository = cursoRepository;
+    }
+
+    public DatosRespuestaTopico crearTopico(DatosRegistroTopico datos, Long usuarioId) {
+        if (topicoRepository.existsByTituloAndCursoId(datos.titulo(), datos.idCurso())) {
+            throw new ValidationException("Ya existe un tópico con el mismo título en este curso");
+        }
+        if (!usuarioRepository.existsById(usuarioId)){
+            throw new ValidationException("El ID del autor no existe");
+        }
+
+        var usuario = usuarioRepository.findById(usuarioId).get();
+        var curso = cursoRepository.findById(datos.idCurso()).orElseThrow(() -> new ValidationException("El ID del curso no existe"));
+
+        var topico = new Topico(datos);
+        topico.setAutor(usuario);
+        topico.setCurso(curso);
+        topicoRepository.save(topico);
+
+        return new DatosRespuestaTopico(topico);
+    }
+
+
+    public Page<DatosDetalleTopico> listar(Pageable pageable) {
+        return topicoRepository.findAll(pageable).map(DatosDetalleTopico::new);
+    }
+
+    @Transactional
+    public DatosDetalleTopico obtenerTopico(Long id) {
+        if (!topicoRepository.existsById(id)) {
+            throw new EntityNotFoundException("El ID del tópico no existe");
+        }
+        var topico = topicoRepository.getReferenceById(id);
+        return new DatosDetalleTopico(topico);
+    }
+
+    @Transactional
+    public DatosDetalleTopico actualizarTopico(@Valid DatosRegistroTopico datos, Long id) {
+        var topico = topicoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("El ID del tópico no existe"));
+
+        if (topicoRepository.existsByTituloAndCursoId(datos.titulo(), datos.idCurso())) {
+            throw new ValidationException("Ya existe un tópico con el mismo título en este curso");
+        }
+        
+        topico.actualizarInformacion(datos);
+        return new DatosDetalleTopico(topico);
+    }
+
+    @Transactional
+    public void eliminarTopico(Long id, Usuario usuario) {
+
+        topicoRepository.deleteById(id);
+    }
+
+    @Transactional
+    public DatosSolucion marcarComoSolucion(Long idTopico, Long idRespuesta) {
+        var topico = topicoRepository.findById(idTopico).orElseThrow(() -> new EntityNotFoundException("El ID del tópico no existe"));
+
+        topico.getRespuesta()
+                .forEach(r -> r.setSolucion(false));
+
+        var respuesta = topico.getRespuesta().stream()
+                .filter(r -> r.getId().equals(idRespuesta))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("El ID de la respuesta no existe en este tópico"));
+
+        topico.setStatus(StatusTopico.CERRADO);
+        respuesta.setSolucion(true);
+
+        return new DatosSolucion(respuesta);
+
+    }
+
+
+}
